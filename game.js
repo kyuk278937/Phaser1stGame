@@ -44,6 +44,7 @@ function create ()
     player = this.physics.add.sprite(100, 450, 'dude');//Створюємо та налаштовуємо спрайт гравця
     player.setBounce(0.2);
     player.setCollideWorldBounds(true);
+    player.body.setGravityY(300)//Змінено гравітацію гравця
 
     this.anims.create({//Створюємо та налаштовуємо анімації
         key: 'left',
@@ -64,6 +65,8 @@ function create ()
         frameRate: 10,
         repeat: -1
     });
+
+    this.physics.add.collider(player, platforms);//Додано колізії між гравцем та платформами
 }
 
 function update ()
