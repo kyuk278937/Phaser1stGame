@@ -2,6 +2,13 @@ var config = { //Налаштовуємо сцену
     type: Phaser.AUTO,
     width: 800,
     height: 600,
+    physics: { //Налаштовуємо фізику
+        default: 'arcade',
+        arcade: {
+            gravity: { y: 300 },
+            debug: false
+        }
+    },
     scene: {
         preload: preload,
         create: create,
@@ -26,7 +33,13 @@ function preload () //Завантажуємо графіку для гри
 function create ()
 {
     this.add.image(400, 300, 'sky');//Додаемо небо
-    this.add.image(400, 300, 'star');//Додаємо зірку
+
+    platforms = this.physics.add.staticGroup();//Створюемо фізичну групу платформ
+
+    platforms.create(400, 568, 'ground').setScale(2).refreshBody();//Створюемо платформи
+    platforms.create(600, 400, 'ground');
+    platforms.create(50, 250, 'ground');
+    platforms.create(750, 220, 'ground');
 }
 
 function update ()
