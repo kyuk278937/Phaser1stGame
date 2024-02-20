@@ -19,6 +19,12 @@ var config = { //Налаштовуємо сцену
 var game = new Phaser.Game(config);
 var player;
 
+//Функція підбору зірок
+function collectStar (player, star)
+{
+    star.disableBody(true, true);
+}
+
 function preload () //Завантажуємо графіку для гри
 {
     this.load.image('sky', 'assets/sky.png');
@@ -54,7 +60,20 @@ function create ()
     player.setCollideWorldBounds(true);
 
     //Змінено гравітацію гравця
-    player.body.setGravityY(300)
+    player.body.setGravityY(0)
+
+    //Створення та налаштування зірок
+    stars = this.physics.add.group({
+        key: 'star',
+        repeat: 11,
+        setXY: { x: 12, y: 0, stepX: 70 }
+    });
+    
+    stars.children.iterate(function (child) {
+    
+        child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+    
+    });
 
     //Створюємо та налаштовуємо анімації
     this.anims.create({
@@ -79,6 +98,12 @@ function create ()
 
     //Додано колізії між гравцем та платформами
     this.physics.add.collider(player, platforms);
+
+    //Додано колізію між зірками та платформами
+    this.physics.add.collider(stars, platforms);
+
+    //Додано перевірку дотику до зірки
+    this.physics.add.overlap(player, stars, collectStar, null, this);
 }
 
 function update ()
