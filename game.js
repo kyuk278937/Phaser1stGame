@@ -17,12 +17,20 @@ var config = { //Налаштовуємо сцену
 };
 
 var game = new Phaser.Game(config);
+
 var player;
+
+var score = 0;
+var scoreText;
 
 //Функція підбору зірок
 function collectStar (player, star)
 {
     star.disableBody(true, true);
+
+    //Нараховуємо бали
+    score += 10;
+    scoreText.setText('Score: ' + score);
 }
 
 function preload () //Завантажуємо графіку для гри
@@ -41,6 +49,9 @@ function create ()
 {
     //Додаемо небо
     this.add.image(400, 300, 'sky');
+
+    //Створюемо текст з рахунком
+    scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' });
 
     //Ініціалізуємо курсор Phaser
     cursors = this.input.keyboard.createCursorKeys();
