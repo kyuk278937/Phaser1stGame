@@ -2,6 +2,7 @@ var config = { //Налаштовуємо сцену
     type: Phaser.AUTO,
     width: 800,
     height: 600,
+    pixelArt: true,
     physics: { //Налаштовуємо фізику
         default: 'arcade',
         arcade: {
@@ -21,62 +22,71 @@ var game = new Phaser.Game(config);
 var score = 0;
 var scoreText;
 
+var record = 0
+
 //Функція підбору зірок
-function collectStar (player, star)
+function collectKiwi (player, kiwi)
 {
-    star.disableBody(true, true);
+    kiwi.disableBody(true, true);
 
     //Нараховуємо бали
     score += 10;
     scoreText.setText('Score: ' + score);
 
-    //Створення бомби при виконнанні умов
-    if (stars.countActive(true) === 0)
+    //Створення бромб
+    var bomb = bombs.create(x, 16, 'bomb').setScale(0.1);
+    bomb.setBounce(1);
+    bomb.setCollideWorldBounds(true);
+    bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+
+
+    //Перестворення зірочок
+    if (kiwis.countActive(true) === 0)
     {
-        stars.children.iterate(function (child) {
+        kiwis.children.iterate(function (child) {
 
             child.enableBody(true, child.x, 0, true, true);
-
+            child.anims.play('kiwi_anim');
+            child.setScale(1.5);
         });
 
         var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
-
-        var bomb = bombs.create(x, 16, 'bomb');
-        bomb.setBounce(1);
-        bomb.setCollideWorldBounds(true);
-        bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
-
     }
 }
 
-//Після зіткнення 3 бомбою
+//Після зіткнення 3
 function hitBomb (player, bomb)
 {
     this.physics.pause();
-
     player.setTint(0xff0000);
-
     player.anims.play('turn');
-
     gameOver = true;
+
+    this.scene.restart();
+
+    if(score > record){
+        record = score;
+        document.getElementById("record_text").innerHTML = "Рекорд :<br/>" + record;
+    }
+    score = 0
 }
 
 function preload () //Завантажуємо графіку для гри
 {
     this.load.image('sky', 'assets/sky.png');
     this.load.image('ground', 'assets/platform.png');
-    this.load.image('star', 'assets/star.png');
+    this.load.spritesheet('kiwi', 'assets/Kiwi.png',{ frameWidth: 32, frameHeight: 32 });
     this.load.image('bomb', 'assets/bomb.png');
     this.load.spritesheet('dude', 
         'assets/dude.png',
-        { frameWidth: 32, frameHeight: 48 }
+        { frameWidth: 32, frameHeight: 32 }
     );
 }
 
 function create ()
 {
     //Додаемо небо
-    this.add.image(400, 300, 'sky');
+    this.add.image(400, 215, 'sky').setScale(0.6);
 
     //Створюемо текст з рахунком
     scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' });
@@ -94,7 +104,7 @@ function create ()
     platforms.create(750, 220, 'ground');
 
     //Створюємо та налаштовуємо спрайт гравця
-    player = this.physics.add.sprite(100, 450, 'dude');
+    player = this.physics.add.sprite(100, 450, 'dude').setScale(2);
     player.setBounce(0.2);
     player.setCollideWorldBounds(true);
 
@@ -107,16 +117,25 @@ function create ()
     player.body.setGravityY(0)
 
     //Створення та налаштування зірок
-    stars = this.physics.add.group({
-        key: 'star',
+    kiwis = this.physics.add.group({
+        key: 'kiwi',
         repeat: 11,
         setXY: { x: 12, y: 0, stepX: 70 }
     });
     
-    stars.children.iterate(function (child) {
+    //Анімація для ківі
+    this.anims.create({
+        key: 'kiwi_anim',
+        frames: this.anims.generateFrameNumbers('kiwi', { start: 0, end: 16 }),
+        frameRate: 16,
+        repeat: -1
+    });
+
+    kiwis.children.iterate(function (child) {
     
         child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
-    
+        child.anims.play('kiwi_anim');
+        child.setScale(1.5);
     });
 
     //Створюємо та налаштовуємо анімації
@@ -144,10 +163,10 @@ function create ()
     this.physics.add.collider(player, platforms);
 
     //Додано колізію між зірками та платформами
-    this.physics.add.collider(stars, platforms);
+    this.physics.add.collider(kiwis, platforms);
 
     //Додано перевірку дотику до зірки
-    this.physics.add.overlap(player, stars, collectStar, null, this);
+    this.physics.add.overlap(player, kiwis, collectKiwi, null, this);
 }
 
 function update ()

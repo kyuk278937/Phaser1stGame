@@ -5,3 +5,8 @@ body {
     justify-content: center;
     align-items: center;
 }
+#record_text  {
+    font: 150%  "Consolas", monospace;
+    position: absolute;
+    right: 15%;
+}
